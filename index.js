@@ -297,6 +297,54 @@ app.post("/users", async (req, res) => {
   }
 });
 
+//update users
+app.put("/user/verified", verifyJWT, async (req, res) => {
+  try {
+    const id = req.query.id;
+    const filter = { _id: ObjectId(id) };
+    const updateDoc = {
+      $set: { verified: true },
+    };
+
+    const setUser = await Users.updateOne(filter, updateDoc);
+
+    res.send({
+      result: true,
+      data: setUser,
+      message: `users`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//delete user
+
+app.delete("/users/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const filter = { _id: ObjectId(id) };
+
+    const result = await Users.deleteOne(filter);
+
+    res.send({
+      result: true,
+      data: result,
+      message: `user  deleted`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
