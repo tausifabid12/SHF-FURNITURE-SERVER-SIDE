@@ -41,6 +41,28 @@ const Users = client.db("Furniture").collection("Users");
 const Bookings = client.db("Furniture").collection("Bookings");
 const Reports = client.db("Furniture").collection("Reports");
 
+// ************ apis **************** \\
+
+//********* category apis ***********//
+//getting category
+app.get("/category", async (req, res) => {
+  try {
+    const query = {};
+    const categories = await Category.find(query).toArray();
+    res.send({
+      result: true,
+      data: categories,
+      message: "categories",
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
