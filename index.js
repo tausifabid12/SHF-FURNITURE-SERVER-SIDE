@@ -63,6 +63,175 @@ app.get("/category", async (req, res) => {
   }
 });
 
+//********* products apis ***********//
+
+//getting products
+app.get("/products", async (req, res) => {
+  try {
+    const query = {};
+    const products = await Products.find(query).toArray();
+    res.send({
+      result: true,
+      data: products,
+      message: "products",
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//getting products with category
+app.get("/products/:cat", async (req, res) => {
+  try {
+    const cat = req.params.cat;
+    const query = { category: cat };
+    const filteredProducts = await Products.find(query).toArray();
+    res.send({
+      result: true,
+      data: filteredProducts,
+      message: `${cat} products`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+//getting products with id
+app.get("/products/item/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) };
+    const filteredProducts = await Products.findOne(query);
+    res.send({
+      result: true,
+      data: filteredProducts,
+      message: `${id} product  details`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//getting user's products
+app.get("/userProducts", verifyJWT, async (req, res) => {
+  try {
+    const email = req.query.email;
+    const query = { email: email };
+    const filteredProducts = await Products.find(query).toArray();
+    res.send({
+      result: true,
+      data: filteredProducts,
+      message: `${email} products`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//getting advertise  products
+app.get("/advertise", verifyJWT, async (req, res) => {
+  try {
+    const query = {
+      advertise: true,
+    };
+    const filteredProducts = await Products.find(query).toArray();
+    res.send({
+      result: true,
+      data: filteredProducts,
+      message: `advertise products`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//adding products
+app.post("/products", async (req, res) => {
+  try {
+    const productInfo = req.body;
+    console.log(productInfo);
+    const addProduct = await Products.insertOne(productInfo);
+
+    res.send({
+      result: true,
+      data: addProduct,
+      message: `Product added`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//setting advertise products
+
+app.put("/products", async (req, res) => {
+  try {
+    const id = req.query.id;
+    const body = req.body;
+
+    const filter = { _id: ObjectId(id) };
+    const updateDoc = {
+      $set: { advertise: body.advertise },
+    };
+    const result = await Products.updateOne(filter, updateDoc);
+    res.send({
+      result: true,
+      data: result,
+      message: "updated",
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/delete/products/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const filter = { _id: ObjectId(id) };
+
+    const result = await Products.deleteOne(filter);
+
+    res.send({
+      result: true,
+      data: result,
+      message: `user  deleted`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
