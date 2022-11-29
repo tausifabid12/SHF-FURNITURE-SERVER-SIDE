@@ -34,6 +34,13 @@ function dbConnect() {
 
 dbConnect();
 
+// ************ collections **************** \\
+const Category = client.db("Furniture").collection("Category");
+const Products = client.db("Furniture").collection("Products");
+const Users = client.db("Furniture").collection("Users");
+const Bookings = client.db("Furniture").collection("Bookings");
+const Reports = client.db("Furniture").collection("Reports");
+
 app.listen(port, () => {
   console.log("server is running");
 });
