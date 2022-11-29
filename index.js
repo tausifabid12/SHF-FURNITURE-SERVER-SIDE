@@ -232,6 +232,31 @@ app.delete("/delete/products/:id", async (req, res) => {
   }
 });
 
+//********* users apis ***********//
+//getting all users
+app.get("/users", verifyJWT, async (req, res) => {
+  try {
+    let filter = {};
+    const role = req.query.role;
+    if (role) {
+      filter = { role: role };
+    }
+
+    const users = await Users.find(filter).toArray();
+    res.send({
+      result: true,
+      data: users,
+      message: `users`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
