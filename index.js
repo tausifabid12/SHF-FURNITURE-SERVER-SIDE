@@ -10,6 +10,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).send("unauthorized access");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
+
 // ************ connecting mongodb **************** \\
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.brxmqep.mongodb.net/?retryWrites=true&w=majority`;
@@ -43,7 +61,27 @@ const Reports = client.db("Furniture").collection("Reports");
 
 // ************ apis **************** \\
 
+app.get("/", (req, res) => {
+  res.send("Furniture server is up");
+});
+
+//********* jwt apis ***********//
+
+app.get("/jwt", async (req, res) => {
+  const email = req.query.email;
+  const query = { email: email };
+  const user = await Users.findOne(query);
+  if (user) {
+    const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+      expiresIn: "1d",
+    });
+    return res.send({ accessToken: token });
+  }
+  res.status(403).send({ accessToken: "" });
+});
+
 //********* category apis ***********//
+
 //getting category
 app.get("/category", async (req, res) => {
   try {
@@ -416,6 +454,63 @@ app.delete("/delete/booking/:id", async (req, res) => {
       result: true,
       data: result,
       message: `Product added`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+//********* report apis ***********//
+
+app.get("/report", verifyJWT, async (req, res) => {
+  try {
+    let filter = {};
+    const reports = await Reports.find(filter).toArray();
+    res.send({
+      result: true,
+      data: reports,
+      message: `all booking info`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+app.post("/report", async (req, res) => {
+  try {
+    const reportInfo = req.body;
+    const result = await Reports.insertOne(reportInfo);
+
+    res.send({
+      result: true,
+      data: result,
+      message: `Report added`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/delete/report/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) };
+    const result = await Reports.deleteOne(query);
+
+    res.send({
+      result: true,
+      data: result,
+      message: ``,
     });
   } catch (error) {
     console.log(error.name, error.message);
