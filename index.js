@@ -345,6 +345,87 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
+//********* booking apis ***********//
+
+//getting user's booking information
+app.get("/booking/user", verifyJWT, async (req, res) => {
+  try {
+    const email = req.query.email;
+    const filter = { email: email };
+    const userBooking = await Bookings.find(filter).toArray();
+    res.send({
+      result: true,
+      data: userBooking,
+      message: `bookings of user`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//getting all booking information
+app.get("/booking", async (req, res) => {
+  try {
+    let filter = {};
+    const booking = await Bookings.find(filter).toArray();
+    res.send({
+      result: true,
+      data: booking,
+      message: `all booking info`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+//storing booking info
+app.post("/booking", async (req, res) => {
+  try {
+    const bookingInfo = req.body;
+    const saveBookingInfo = await Bookings.insertOne(bookingInfo);
+
+    res.send({
+      result: true,
+      data: saveBookingInfo,
+      message: `booking added successfully`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+///* deleting bookings
+app.delete("/delete/booking/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: ObjectId(id) };
+    const result = await Bookings.deleteOne(query);
+
+    res.send({
+      result: true,
+      data: result,
+      message: `Product added`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
