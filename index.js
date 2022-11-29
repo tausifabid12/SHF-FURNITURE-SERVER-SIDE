@@ -257,6 +257,46 @@ app.get("/users", verifyJWT, async (req, res) => {
   }
 });
 
+//getting single user info
+app.get("/usersInfo", async (req, res) => {
+  try {
+    const email = req.query.email;
+    filter = { email: email };
+    const user = await Users.findOne(filter);
+    res.send({
+      result: true,
+      data: user,
+      message: `users`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
+//creating  users
+app.post("/users", async (req, res) => {
+  try {
+    const userInfo = req.body;
+    const setUser = await Users.insertOne(userInfo);
+
+    res.send({
+      result: true,
+      data: setUser,
+      message: `users`,
+    });
+  } catch (error) {
+    console.log(error.name, error.message);
+    res.send({
+      result: false,
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("server is running");
 });
